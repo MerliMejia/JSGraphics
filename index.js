@@ -1,10 +1,11 @@
 let canvas;
 let WIDTH;
 let HEIGHT;
+let drawBuffer = [[]];
 
 // Helper function to create pixels.
 const pixel = (x, y) => {
-  const div = document.createElement('div');
+  const div = drawBuffer[y][x];
   div.style.width = '1px';
   div.style.height = '1px';
   div.style.position = 'absolute';
@@ -64,9 +65,16 @@ const drawBresenhamLine = (x0, y0, x1, y1, stepCallback) => {
 const clear = () => {
   canvas.replaceChildren();
   for (let i = 0; i < HEIGHT; i++) {
+    drawBuffer[i] = [];
     for (let k = 0; k < WIDTH; k++) {
-      const div = pixel(k, i);
+      const div = document.createElement('div');
+      div.style.width = '1px';
+      div.style.height = '1px';
+      div.style.position = 'absolute';
+      div.style.top = `${i}px`;
+      div.style.left = `${k}px`;
       div.style.backgroundColor = 'red';
+      drawBuffer[i][k] = div;
       canvas.appendChild(div);
     }
   }
@@ -98,27 +106,21 @@ window.onload = (e) => {
   };
 
   //Drawing points
-  const div0 = pixel(p0.x, p0.y);
-  canvas.appendChild(div0);
-  const div1 = pixel(p1.x, p1.y);
-  canvas.appendChild(div1);
-  const div2 = pixel(p2.x, p2.y);
-  canvas.appendChild(div2);
+  pixel(p0.x, p0.y);
+  pixel(p1.x, p1.y);
+  pixel(p2.x, p2.y);
 
   // Draw lines between points
   // p0 -> p1
   drawBresenhamLine(p0.x, p0.y, p1.x, p1.y, (x, y) => {
-    const linePixel = pixel(x, y);
-    canvas.appendChild(linePixel);
+    pixel(x, y);
   });
   // p1 -> p2
   drawBresenhamLine(p1.x, p1.y, p2.x, p2.y, (x, y) => {
-    const linePixel = pixel(x, y);
-    canvas.appendChild(linePixel);
+    pixel(x, y);
   });
   // p2 -> p0
   drawBresenhamLine(p2.x, p2.y, p0.x, p0.y, (x, y) => {
-    const linePixel = pixel(x, y);
-    canvas.appendChild(linePixel);
+    pixel(x, y);
   });
 };
