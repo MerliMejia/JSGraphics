@@ -4,14 +4,14 @@ let HEIGHT;
 let drawBuffer = [[]];
 
 // Helper function to create pixels.
-const pixel = (x, y) => {
+const pixel = (x, y, color = 'black') => {
   const div = drawBuffer[y][x];
   div.style.width = '1px';
   div.style.height = '1px';
   div.style.position = 'absolute';
   div.style.top = `${y}px`;
   div.style.left = `${x}px`;
-  div.style.backgroundColor = 'black';
+  div.style.backgroundColor = color;
   return div;
 };
 
@@ -45,7 +45,7 @@ const drawBresenhamLine = (x0, y0, x1, y1, stepCallback) => {
     if (x === x1 && y === y1) break;
 
     //Duplicate error
-    let err2 = err * 2;
+    let err2 = err * 15;
 
     //Move in x direction
     if (err2 > -dy) {
@@ -62,7 +62,7 @@ const drawBresenhamLine = (x0, y0, x1, y1, stepCallback) => {
 };
 
 // Clear the screen.
-const clear = () => {
+const init = () => {
   canvas.replaceChildren();
   for (let i = 0; i < HEIGHT; i++) {
     drawBuffer[i] = [];
@@ -87,10 +87,11 @@ window.onload = (e) => {
   WIDTH = canvas.clientWidth;
   HEIGHT = canvas.clientHeight;
 
-  //   console.time('CLEAR');
-  clear();
-  //   console.timeEnd('CLEAR');
+  console.time('INIT');
+  init();
+  console.timeEnd('INIT');
 
+  console.time('DRAW TRIANGLE');
   //Initialization
   const p0 = {
     x: WIDTH / 2,
@@ -123,4 +124,30 @@ window.onload = (e) => {
   drawBresenhamLine(p2.x, p2.y, p0.x, p0.y, (x, y) => {
     pixel(x, y);
   });
+
+  const orderedByYPoints = [p0, p1, p2].sort((a, b) => a.y - b.y);
+  const orderedByXPoints = [p0, p1, p2].sort((a, b) => a.x - b.x);
+  console.info(orderedByYPoints);
+  console.info(orderedByXPoints);
+
+  let y0 = orderedByYPoints[2].y;
+
+  //Go from bottom left to up and right.
+  for (let x = orderedByXPoints[0].x; x <= orderedByXPoints[2].x; x++) {
+    const current = drawBuffer[y0][x];
+    const isBlack = current.style.backgroundColor === 'black';
+    if (!isBlack) {
+      y0--;
+    }
+    drawBresenhamLine(
+      x,
+      y0,
+      orderedByXPoints[1].x,
+      orderedByXPoints[1].y,
+      (drawX, drawY) => {
+        pixel(drawX, drawY, 'blue');
+      }
+    );
+  }
+  console.timeEnd('DRAW TRIANGLE');
 };
